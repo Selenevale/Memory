@@ -1,0 +1,1970 @@
+/* 全局重置和基础设定 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body, html {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    height: 100%;
+    overflow: hidden; /* 防止主页面滚动 */
+    background-color: #fdfdfa; /* 一个柔和的背景色 */
+}
+
+#app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    position: relative;
+}
+
+/* 侧边栏样式 */
+#sidebar {
+    position: fixed;
+    left: -240px; /* 初始状态隐藏在左侧 */
+    top: 0;
+    width: 240px;
+    height: 100%;
+    background-color: #ffffff;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    display: flex; /* <--- 添加这行 */
+    flex-direction: column; /* <--- 添加这行 */
+}
+
+/* 【请新建这段代码】 */
+.sidebar-content {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 【请新建这段代码】 */
+#tags-nav-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    min-height: 0;
+}
+
+#sidebar.open {
+    left: 0; /* 'open' 类被添加时滑出 */
+}
+
+/* 【全新的遮罩层样式】 */
+#sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.4); /* 半透明的黑色 */
+    z-index: 999; /* 层级比侧边栏低，比主内容高 */
+    
+    /* 默认完全透明，且无法点击 */
+    opacity: 0;
+    pointer-events: none;
+    
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* 主内容区样式 */
+#main-content {
+    flex-grow: 1;
+    overflow-y: auto; /* 内容区可以独立滚动 */
+    height: 100%;
+    position: relative; /* <-- 【只添加这一行】 */
+}
+
+/* 视图容器样式 */
+.view {
+    display: none; /* 移除 !important */
+    height: 100%;
+    width: 100%;
+}
+
+/* 2. 激活的视图，默认用 block 布局 (适用于首页、列表页等) */
+.view.active-view {
+    display: block; /* 移除 !important */
+}
+
+/* 为需要 flex 布局的视图（比如聊天详情页）单独设置 */
+/* --- 【最终布局修正】为聊天和日记编辑页启用绝对定位 --- */
+#timelines-view.active-view,
+#chat-detail-view.active-view,
+#diary-entry-view.active-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 侧边栏导航链接样式 */
+#nav-links {
+    list-style: none;
+    padding-top: 20px;
+}
+
+#nav-links li a {
+    display: block;
+    padding: 15px 20px;
+    color: #333;
+    text-decoration: none;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+#nav-links li a:hover {
+    background-color: #f0f0f0;
+}
+
+#nav-links li a.active {
+    background-color: #f5f6ff; /* 激活链接的背景色 */
+    font-weight: bold;
+    color: #b8a9f9;
+}
+
+/* 首页导入按钮的简单样式 */
+#import-btn {
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #none;
+    color: #eeeeee;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* 弹窗样式 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none; /* 默认隐藏 */
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-overlay.visible {
+    display: flex; /* 显示弹窗 */
+}
+
+.modal-content {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.modal-content .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.modal-content h2 {
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.format-hint {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+#import-textarea {
+    width: 100%;
+    height: 200px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+#import-title {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+#parse-and-save-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #b1b6c8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* ============================= */
+/* --- 【最终版】记忆列表融合抬头样式 --- */
+/* =============================== */
+
+/* 1. 抬头总容器 */
+.memory-header {
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e5e5e5;
+    flex-shrink: 0;
+}
+
+/* 2. 第一层：主抬头 */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 56px;
+    padding: 0 16px;
+}
+
+/* 3. 左侧的“聊天/星标”切换开关 */
+.view-switcher {
+    display: flex;
+    background-color: #e9e9eb;
+    border-radius: 10px;
+    padding: 4px;
+}
+.switcher-btn {
+    background: none;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #5c85f4;
+}
+.switcher-btn.active {
+    background-color: #ffffff; /* 激活时是白色 */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    color: #5c85f4;
+}
+
+/* 4. 通用的文字按钮样式 */
+.header-btn-text {
+    background: none;
+    border: none;
+    color: #555555;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+/* 5. 第二层：选择模式抬头 */
+.selection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 44px;
+    padding: 0 16px;
+    max-height: 0; /* 核心：默认高度为0，实现收起效果 */
+    overflow: hidden; /* 核心：隐藏超出的内容 */
+    transition: max-height 0.3s ease-in-out; /* 核心：平滑的展开/收起动画 */
+}
+.selection-header.visible {
+    max-height: 44px; /* 展开时的高度 */
+}
+.selection-header .selection-actions {
+    display: flex;
+    gap: 15px;
+}
+
+/* 6. 统一的列表容器 */
+#memory-list-container {
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 75px; /* 为底部工具栏留出空间 */
+}
+
+/* 每一个聊天列表项的样式 */
+.chat-list-item {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    /* 【核心修改】增加了垂直偏移、模糊度和颜色深度，让阴影更明显 */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.chat-list-item:hover {
+    transform: translateY(-3px); /* 悬停时上浮得更高一点 */
+    /* 【核心修改】同样加重了悬停时的阴影，提供更强的视觉反馈 */
+    box-shadow: 0 5px 12px rgba(0,0,0,0.12);
+}
+
+.chat-list-item .title {
+    font-weight: bold;
+    font-size: 16px;
+    color: #3c3c3c;
+    margin-bottom: 5px;
+}
+
+.chat-list-item .date {
+    font-size: 13px;
+    color: #888;
+}
+
+/* --- 全新聊天布局样式 v3.0 --- */
+#chat-detail-view {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+.chat-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 8px;
+    border-bottom: 1px solid #e5e5e5;
+    background-color: #f9f9f9;
+    flex-shrink: 0;
+    justify-content: space-between; /* <<-- “管家”回来了！ */
+}
+
+#back-to-list-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: normal;
+    cursor: pointer;
+    margin-right: 15px;
+    padding: 0 10px;
+    color: #555555;
+}
+
+#chat-detail-title {
+    font-size: 17px;
+    font-weight: 600;
+}
+
+#messages-container {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 10px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+/* 消息条目的通用样式 */
+/* 元信息行 (头像和时间戳) */
+.message-meta {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+    color: #999;
+}
+.message-item .avatar {
+    width: 45px; /* 稍微增大一点点头像框的尺寸 */
+    height: 45px;
+    border-radius: 50%; /* 把头像框变成圆形 */
+    
+    /* 【核心】让内部的 SVG 图标完美居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    flex-shrink: 0;
+}
+
+
+/* --- (新增) 分别定义 AI 和用户的图标颜色 --- */
+.ai-message .avatar svg {
+    color: #8e8e93; /* AI 的图标用中性灰 */
+}
+.user-message .avatar svg {
+    color: #b1b6c8; /* 用户的图标用我们选定的蓝灰色 */
+}
+
+/* --- (新增) 分别定义 AI 和用户的头像框【边框】颜色 --- */
+.ai-message .avatar {
+    border: 1px solid #e0e0e0; /* AI 的头像框用浅灰色边框 */
+}
+.user-message .avatar {
+    border: 1px solid #b1b6c8; /* 用户的头像框用蓝灰色边框 */
+}
+.message-timestamp-single {
+    /* 继承父级的 font-size 和 color */
+    align-self: flex-end; /* 1. 让时间戳在自己的小空间里“靠右” */
+    padding: 0 4px;       /* 2. 增加一点点左右内边距，让它看起来更舒服 */
+}
+
+/* (新增) 为 AI 的时间戳设置靠左对齐 */
+.ai-message .message-timestamp-single {
+    align-self: flex-start; /* 让 AI 的时间戳“靠左” */
+}
+/* 气泡本身的样式 */
+.message-item .message-bubble {
+    padding: 10px 15px;
+    border-radius: 12px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    width: fit-content;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+/* 【请添加这段全新的“选中高亮”样式】 */
+.message-item.selected .message-bubble {
+    /* 在气泡外层添加一个高亮的光晕效果 */
+    box-shadow: 0 0 0 2px rgba(80, 122, 255, 0.5); 
+    transform: scale(1.02); /* 轻微放大，提供反馈 */
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+/* 系统时间戳的样式 (分隔日期的那个) */
+.timestamp {
+    font-size: 12px;
+    color: #999;
+    text-align: center;
+    width: 100%;
+    margin: 10px 0 20px 0;
+}
+/* AI消息的样式 (靠左) */
+.ai-message {
+    align-items: flex-start;
+    align-self: flex-start;
+    max-width: 100%;
+}
+.ai-message .avatar { background-color: #E5E5EA; }
+.ai-message .message-bubble {
+    background-color: #f5f5f5;
+    color: #333333;
+    border: 1px solid #e0e0e0; /* 添加一条稍深一点的、柔和的灰色边框 */
+    border-top-left-radius: 5px;
+}
+/* 您的消息样式 (靠右) */
+.user-message {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+    max-width: 100%;
+}
+.user-message .message-meta {
+    flex-direction: row-reverse; /* 让头像在右边 */
+}
+.user-message .avatar { background-color: #E5E5EA; }
+.user-message .message-bubble {
+    background-color: #b1b6c8;
+    color: #fff;
+    border-top-right-radius: 5px;
+}
+
+/* 【全新的聊天编辑框样式】 */
+.message-edit-textarea {
+    width: 100%;
+    border: 1px solid #007aff; /* 增加一个蓝色边框，表示正在编辑 */
+    border-radius: 8px;       /* 让它有自己的圆角 */
+    padding: 8px;             /* 给予合适的内边距 */
+    margin: 0;
+    background-color: #ffffff; /* 核心：强制设置白色背景 */
+    box-sizing: border-box;
+    
+    /* 字体、行高可以继承，但颜色需要强制指定为黑色 */
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    color: #000000; /* 核心：强制设置黑色字体 */
+    
+    /* 高度自适应 */
+    resize: none;
+    overflow: hidden;
+}
+.message-edit-textarea:focus {
+    outline: none;
+}
+
+/* --- 多选功能样式 --- */
+/* 消息条目作为滑动容器 */
+/* 消息条目的通用样式 (防抖动优化版) */
+.message-item {
+    display: flex;           /* 1. 将整条消息变成一个 Flex 容器 */
+    align-items: flex-start; /* 2. 【核心】让所有子项（头像和气泡）都从顶部开始对齐 */
+    gap: 8px;                /* 3. 在头像和气泡之间增加 8px 的固定间距 */
+    margin-bottom: 15px;     /* 4. 确保消息之间有足够的垂直间距 */
+}
+
+/* --- 聊天详情页日期样式 --- */
+.title-date-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 居中对齐 */
+}
+
+#chat-detail-date {
+    font-size: 12px;
+    color: #888;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+#chat-detail-date:hover {
+    background-color: #e9e9eb; /* 鼠标悬停时给一点反馈 */
+}
+
+/* --- 聊天列表选择模式样式 --- */
+
+/* 让列表可以独立滚动 */
+#chats-list-container {
+    height: calc(100% - 60px); /* 减去头部的高度 */
+    overflow-y: auto;
+}
+
+/* 聊天列表项被选中时的样式 */
+.chat-list-item.selected {
+    background-color: rgba(241,238,255,0.7); /* 用一个明显的颜色来表示选中 */
+    transform: none; /* 选中时取消悬浮效果，避免晃动 */
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* --- 下载链接容器样式 --- */
+.download-container {
+    position: fixed;
+    bottom: -100px; /* 默认藏在屏幕下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 400px;
+    background-color: #e5e7ff;
+    color: #555555;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+    text-align: center;
+    z-index: 3000;
+    transition: bottom 0.4s ease-in-out;
+}
+
+.download-container.visible {
+    bottom: 20px; /* 'visible' 类被添加时滑出 */
+}
+
+.download-container a {
+    color:#555555;
+    font-weight: bold;
+    text-decoration: underline;
+    font-size: 16px;
+}
+
+/* --- 导出预览弹窗样式 --- */
+#export-textarea {
+    width: 100%;
+    height: 60vh;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    font-family: monospace;
+    margin-bottom: 10px;
+    resize: none;
+}
+
+#select-all-export-btn { /* ID和样式修改 */
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #b1b6c8; /* 蓝色，表示这是一个操作按钮 */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* --- 聊天详情页菜单新样式 --- */
+
+/* 让 header 可以容纳绝对定位的菜单 */
+#default-chat-header {
+    position: relative;
+}
+
+/* “三点”菜单按钮 */
+.chat-menu-button {
+    background: none;
+    border: none;
+    font-size: 20px;
+    font-weight: 500;
+    color: #888888;
+    cursor: pointer;
+    padding: 0 15px;
+    z-index: 1101;
+}
+
+/* 悬浮下拉菜单 */
+.dropdown-menu {
+    position: absolute;
+    top: 55px; /* 菜单顶部位置，刚好在header下方 */
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px); /* 毛玻璃效果 */
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1100;
+    overflow: hidden; /* 保证圆角切割内部按钮 */
+    display: none; /* 默认隐藏 */
+    z-index: 1100;
+}
+
+.dropdown-menu.visible {
+    display: block;
+}
+
+.dropdown-menu button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.05); /* 分隔线 */
+    text-align: left;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.dropdown-menu button:last-child {
+    border-bottom: none; /* 最后一个按钮不要分隔线 */
+}
+
+.dropdown-menu button:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* 备注弹窗的文本框样式 */
+#remarks-textarea {
+    width: 100%;
+    height: 150px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    resize: vertical;
+}
+#save-remarks-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #b1b6c8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* --- 界面微调修复 --- */
+#selection-actions, #selection-chat-actions, #selection-starred-actions {
+    display: flex;
+    align-items: center;
+    white-space: nowrap; /* 核心：禁止按钮换行 */
+}
+/* 列表项中的备注预览样式 */
+.remarks-preview {
+    font-size: 14px;
+    color: #666;
+    margin-top: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 超出部分显示... */
+}
+
+/* 可编辑标题的样式 */
+#chat-detail-title.editable {
+    cursor: pointer;
+    text-decoration: underline dashed 1px #ccc;
+}
+
+/* =================================================================== */
+/* 【最终版】时间轴完整样式 V4 (包含所有部分) */
+/* =================================================================== */
+
+/* --- 1. 抬头区域 --- */
+#timelines-header {
+    justify-content: space-between;
+}
+.timeline-title-button {
+    flex-grow: 1; text-align: left; font-size: 17px; font-weight: 600;
+    background: none; border: none; cursor: pointer; padding: 0 10px;
+    min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block;
+}
+/* --- 【最终修正】为按钮组容器本身添加样式 --- */
+.timeline-actions {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0; /* 核心：禁止这个容器收缩！ */
+    margin-left: auto; /* 核心：把它推到最右边 */
+}
+.timeline-actions button {
+    padding: 3px 6px; border-radius: 15px; cursor: pointer;
+    font-size: 12px; margin-left: 2px; white-space: nowrap;
+}
+
+/* --- 2. 抬头下拉列表 --- */
+#timeline-list-dropdown {
+    top: 60px; left: 10px; right: 10px; max-height: 40vh; overflow-y: auto;
+}
+#timeline-list-dropdown button {
+    display: flex; align-items: center; width: 100%;
+}
+.timeline-list-checkbox {
+    width: 18px; height: 18px; border: 1px solid #ccc;
+    border-radius: 4px; margin-right: 12px; flex-shrink: 0;
+}
+.timeline-list-checkbox.selected {
+    background-color: #e0eaff; border-color: #e0eaff;
+}
+.timeline-list-checkbox.selected::after{
+    content: '✓'; color: #007aff; display: block; text-align: center;
+    font-weight: bold; font-size: 14px;
+}
+
+/* --- 【修正】恢复大纲编辑器弹窗样式 --- */
+#bulk-add-textarea {
+    width: 100%;
+    height: 50vh;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+    margin-bottom: 15px;
+    resize: vertical;
+}
+.format-hint-timeline {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 10px;
+    background-color: #f8f8f8;
+    padding: 8px;
+    border-radius: 5px;
+    line-height: 1.6;
+}
+#save-bulk-nodes-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #b1b6c8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* 【追加】为子列表的折叠功能提供支持 */
+.timeline-node-list.collapsed {
+    display: none;
+}
+
+/* =================================================================== */
+/* 【最终版】基于原始代码“精装修”的时间轴样式 */
+/* =================================================================== */
+
+/* --- 1. 基础容器和竖线 (保持不变) --- */
+#timelines-content-container {
+    padding: 10px 0 20px 15px;
+    position: relative;
+    flex-grow: 1; /* <--- 添加这一行 */
+    overflow-y: auto;
+}
+#timelines-content-container::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background-color: #e0e0e0;
+}
+
+/* --- 2. 列表和列表项 (继承原始布局) --- */
+.timeline-node-list {
+    list-style: none;
+    padding-left: 0;
+}
+.timeline-node-item {
+    position: relative; /* 为绝对定位的三角提供基准 */
+    padding-left: 25px; /* 只保留一个左内边距，为三角让位 */ 
+    margin-top: 10px;
+    }
+
+/* --- 3. 折叠三角 (▶) (精装修) --- */
+.node-toggle {
+    position: absolute; 
+    left: 0;
+    top: 5px; /* 【核心修复】微调这个值，让它和第一行文字对齐 */ 
+
+    /* --- 保留原有属性 --- */
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.2s ease-in-out;
+    font-size: 14px;
+    color: #555;
+    opacity: 0.6;
+    width: 16px;        
+    text-align: center;
+}
+.node-toggle.invisible {
+    visibility: hidden;
+}
+/* 展开时：旋转90度朝下 */
+.node-toggle:not(.collapsed) {
+    transform: rotate(90deg);
+}
+/* 折叠时：不旋转 */
+.node-toggle.collapsed {
+    transform: rotate(0deg);
+}
+
+/* --- 4. 节点内容 (文字和编辑框) --- */
+.node-content-wrapper {
+    /* 为所有节点内容（包括普通文本和编辑框）的容器，
+       增加一个右侧的内边距，让它和左侧对齐，防止紧贴屏幕边缘 */
+    padding-right: 15px;
+}
+.node-text {
+    font-size: 16px;
+    line-height: 1.5;
+    /* 【新增】允许它生长，占据所有可用空间 */
+    flex-grow: 1;
+    /* 【新增】一个防止长文本溢出的 Flexbox 技巧 */
+    min-width: 0;
+}
+.level-3 .node-text.truncated {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- 5. 子列表缩进 (精装修) --- */
+.timeline-node-item > .timeline-node-list {
+    padding-left: 15px; /* 1. 负责向右的“缩进” */
+    
+}
+
+/* --- 【追加】为“就地编辑”模式提供美观的样式 --- */
+
+/* 输入框本身的样式 */
+.node-edit-textarea {
+    width: 100%;
+    padding: 5px;
+    border: 1px solid #007aff;
+    border-radius: 4px;
+    box-sizing: border-box;
+
+    /* 核心：字体和行高要和普通文字完全一致！ */
+    font-size: 16px;
+    line-height: 1.5; 
+
+    /* 核心：移除默认的滚动条，并允许高度平滑变化 */
+    resize: none;
+    overflow: hidden;
+    transition: height 0.1s;
+}
+
+/* 操作按钮容器的样式 */
+.node-edit-actions {
+    margin-top: 8px; /* 和输入框拉开一点距离 */
+}
+
+/* 所有操作按钮的通用样式 */
+.node-edit-actions button {
+    margin-right: 10px;
+    padding: 4px 10px;
+    border-radius: 15px; /* 圆角按钮更柔和 */
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* “保存”按钮的特殊样式 */
+.node-edit-actions .save-node-btn {
+    background-color: #b1b6c8;
+    color: white;
+    border-color: #b1b6c8
+}
+
+/* --- 【追加】大纲编辑器标题输入框样式 --- */
+#bulk-edit-timeline-title {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    border: none;
+    border-bottom: 2px solid #b1b6c8; /* 只有一条底线，更简洁 */
+    margin-bottom: 15px; /* 和下方的提示文字拉开距离 */
+}
+#bulk-edit-timeline-title:focus {
+    outline: none; /* 移除点击时的默认边框 */
+}
+
+/* --- 日记功能样式 --- */
+
+/* 2. 日记网格容器 */
+/* --- 【修正】日记网格容器 --- */
+#diary-grid-container {
+    padding: 15px;
+    /* 核心修正：减去头部和选择模式头部的总高度，确保有滚动空间 */
+    height: calc(100% - 110px); 
+    overflow-y: auto;
+    overflow-x: hidden; /* 禁止水平滚动 */
+    display: grid;
+    /* 核心修正：使用更精确的 calc 来定义列宽，减去间距 */
+    grid-template-columns: repeat(3, calc((100% - 30px) / 3));
+    gap: 15px;
+}
+
+/* --- 【最终修正】3. 月份分割线样式 --- */
+.month-divider {
+    grid-column: 1 / -1; 
+    display: flex;
+    align-items: center;
+    /* 核心：设置一个对称的垂直边距，这将与 grid-gap 结合，创造出完美一致的间距 */
+    margin: 15px 0; 
+    position: sticky;
+    top: -15px; 
+    background-color:transparent;
+    z-index: 10;
+    padding: 5px 0;
+}
+.month-divider:first-child {
+    margin-top: 0;
+}
+
+.month-divider::after {
+    content: '';
+    flex-grow: 1;
+    height: 1px;
+    background-color: #ddd;
+    margin-left: 10px;
+}
+
+.month-text {
+    font-weight: bold;
+    color: #555;
+    font-size: 16px;
+}
+
+/* 4. 单个日记卡片样式 */
+/* --- 日记卡片的【默认】状态 --- */
+.diary-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 12px;
+    /* 【核心修改】使用和聊天卡片完全相同的、更重的阴影 */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    aspect-ratio: 1 / 1;
+}
+
+/* --- 日记卡片的【悬停】状态 --- */
+.diary-card:hover {
+    transform: translateY(-4px); /* 方形卡片可以上浮得更多一点 */
+     /* 【核心修改】使用和聊天卡片完全相同的、更重的悬停阴影 */
+    box-shadow: 0 5px 12px rgba(0,0,0,0.12);
+}
+
+/* 卡片内的日记预览文本 */
+.diary-card-preview {
+    font-size: 14px;
+    color: #666;
+    flex-grow: 1; /* 核心：让它自动伸展，填满所有可用空间，把标签挤到最下面 */
+    overflow: hidden; 
+
+    /* --- 这三行是让“多行省略”生效的魔法 --- */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* 你可以调整这个数字，比如 4 行 */
+}
+
+/* 卡片右下角的日期数字 */
+.diary-card-date {
+    position: absolute;
+    bottom: 8px;
+    right: 12px;
+    font-size: 15px;
+    font-weight: bold;
+    color: #d3d3d3;
+}
+
+/* --- 【新增】日记选择模式下的标签显示样式 --- */
+
+/* 默认状态下，日记标签容器是隐藏的 */
+.diary-tags-display {
+    display: none;
+    flex-wrap: wrap; /* 标签多时可以换行 */
+    gap: 4px;
+    margin-top: 8px; /* 和上面的预览文字拉开一点距离 */
+}
+
+/* 只有当整个日记视图进入选择模式时，才让它显示出来 */
+#diary-view.selection-mode-active .diary-tags-display {
+    display: flex;
+}
+
+/* 单个标签的样式 (和其他地方保持统一) */
+.diary-tags-display span {
+    background-color: #f5f6ff;
+    color: #5c85f4;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+/* --- 【最终修正】5. 日记编辑/查看页面样式 --- */
+#diary-entry-view {
+    /* display: flex; <-- 核心：从这里移除，不再强制显示 */
+    flex-direction: column;
+    height: 100%;
+}
+
+/* 【新增】仅在日记编辑页被激活时，才让它以flex方式显示 */
+#diary-entry-view.active-view {
+    display: flex;
+}
+
+#diary-entry-date-input { /* 之前的步骤里我们把h2换成了input，这里是它的样式 */
+    border: none;
+    background: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+#diary-entry-date-input:focus {
+    outline: none;
+}
+
+#diary-entry-textarea {
+    flex-grow: 1; 
+    width: 100%;
+    border: none;
+    padding: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    resize: none;
+    min-height: 0; /* 确保在flex布局中能正确伸展 */
+}
+#diary-entry-textarea:focus {
+    outline: none;
+}
+#save-diary-entry-btn {
+    background: none;
+    border: none;
+    color: #555555;
+    /* 【核心修改】调整为更适合单个图标的样式 */
+    font-size: 14px;      /* 图标字号 */
+    font-weight: bold;    /* 加粗让对勾更清晰 */
+    width: 32px;          /* 固定宽度 */
+    height: 32px;         /* 固定高度 */
+    padding: 0;           /* 移除内边距 */
+    border-radius: 50%;   /* 变成一个圆形按钮 */
+    cursor: pointer;
+}
+
+/* --- 【新增】日记日期输入框样式 --- */
+#diary-entry-date-input {
+    border: none;
+    background: none;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+}
+#diary-entry-date-input:focus {
+    outline: none;
+}
+
+/* --- 【最终修正】强制恢复聊天/星标窗口的居中布局 --- */
+#chat-detail-view.active-view {
+    display: flex !important;
+    flex-direction: column !important;
+}
+
+/* --- 【新增】日记功能：选择与下拉菜单样式 --- */
+
+/* 1. 当日记视图进入选择模式时的样式 */
+#diary-view.selection-mode-active .diary-card {
+    cursor: pointer;
+}
+
+/* 2. 日记卡片被选中时的“高亮”样式 */
+/* (参考了聊天列表的选中颜色) */
+.diary-card.selected {
+    background-color: rgba(241,238,255,0.7);
+    transform: scale(0.95); /* 轻微缩小以提供反馈 */
+    box-shadow: none;
+}
+
+/* 3. 年份选择下拉菜单的特定样式 */
+#diary-year-dropdown {
+    top: 60px; /* 把它放在抬头正下方 */
+    left: 10px;
+    right: 10px;
+    max-height: 50vh; /* 限制最大高度 */
+    overflow-y: auto;
+}
+
+/* 4. 下拉菜单中每一行的样式 */
+#diary-year-dropdown .year-item {
+    display: flex;
+    justify-content: space-between; /* 年份在左，按钮在右 */
+    align-items: center;
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    text-align: left;
+    font-size: 16px;
+    cursor: pointer;
+    color: #333
+}
+#diary-year-dropdown .year-item:last-child {
+    border-bottom: none;
+}
+#diary-year-dropdown .year-item:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* 5. 每一行年份旁边的小导出按钮 */
+.year-export-btn {
+    background: none;
+    border: 1px solid #333;
+    color: #333;
+    padding: 3px 8px;
+    border-radius: 15px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.year-export-btn:hover {
+    background-color: #e0eaff;
+}
+
+/* --- 【新增】标签功能样式 --- */
+
+/* 1. 侧边栏标签树 */
+.sidebar-section {
+    padding: 10px 20px;
+    border-top: 1px solid #f0f0f0;
+}
+.tag-category-item, .tags-header {
+    margin-top: 10px;
+}
+.tag-category-header, .tags-header {
+    display: flex;
+    justify-content: space-between; /* 核心：让左右内容推到两端 */
+    align-items: center;
+    cursor: pointer;
+    color: #333;
+}
+.tags-header {
+    font-size: 16px;
+}
+/* 【请用这个新版本替换】 */
+.toggle-icon {
+    margin-right: 0; /* 我们不再需要右边距了 */
+    transition: transform 0.2s;
+    /* --- 核心：用 SVG 箭头替换掉原来的 ▶ 字符 --- */
+    content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+    opacity: 0.6;
+}
+.toggle-icon.collapsed {
+    transform: rotate(-180deg); /* <--- 向上旋转180度 */
+}
+.tag-list, .tag-category-list {
+    list-style: none;
+    padding-left: 20px; /* 缩进 */
+    max-height: 1000px;
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+}
+.tag-list.collapsed, .tag-category-list.collapsed {
+    max-height: 0;
+}
+.tag-list-item {
+    padding: 8px 0;
+    cursor: pointer;
+    color: #555;
+    border-radius: 4px;
+}
+.tag-list-item:hover {
+    background-color: #f0f0f0;
+}
+.tag-list-item:focus {
+    outline: none; /* 彻底移除浏览器默认的、丑丑的蓝色或灰色轮廓 */
+}
+
+.tag-list-item.active {
+    color: #000; /* 可以稍微加深一点字体颜色，让它更突出 */
+}
+/* 为“新增”和“取消”按钮设置统一的样式 */
+#add-new-tag-btn,
+#clear-all-tags-btn {
+    /* --- 核心修改 --- */
+    color: #8e8e93; /* 一个比标题稍浅的灰色 */
+    border: 1px solid #e5e5e5; /* 一个非常淡的灰色细边框 */
+    font-size: 14px; /* 比标题（16px）小一点的字体 */
+    
+    /* --- 结构与样式 --- */
+    border-radius: 10px; /* 圆角 */
+    padding: 4px 10px;   /* 内边距，左右可以稍微宽一点 */
+    margin: 8px 0;       /* 上下外边距，让它和标题拉开距离 */
+    display: inline-block;
+    font-style: normal;  /* 取消斜体 */
+    transition: all 0.2s; /* 增加一个过渡效果 */
+}
+
+/* 当鼠标悬停在按钮上时，给一点反馈 */
+#add-new-tag-btn:hover,
+#clear-all-tags-btn:hover {
+    background-color: #f0f2f5; /* 悬停时变成更淡的灰色 */
+    border-color: #d1d1d6;   /* 边框也稍微变深一点 */
+}
+
+/* 2. 新增标签/分类的弹窗 */
+#new-tag-name-input, #new-tag-category-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+#save-new-tag-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #b1b6c8;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* 3. 应用标签的弹窗 */
+#apply-tag-list {
+    max-height: 40vh;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+}
+.apply-tag-item {
+    display: block;
+    margin-bottom: 10px;
+}
+.apply-tag-item label {
+    margin-left: 10px;
+}
+#confirm-apply-tag-btn {
+     width: 100%; padding: 12px; font-size: 16px;
+     background-color: #b1b6c8; color: white;
+     border: none; border-radius: 8px; cursor: pointer;
+}
+
+/* 4. 选择模式下的新按钮 */
+#apply-tags-to-chats-btn {
+    background-color: #e0eaff; /* 绿色，突出 */
+    color: #555555;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 15px;
+    margin: 0 5px;
+}
+
+/* --- 【标签功能样式微调】 --- */
+
+/* 3. 让标签标题的字体和导航链接一致 */
+.tags-header {
+    font-size: 16px; /* 匹配导航链接的字号 */
+    color: #333;   /* 匹配导航链接的颜色 */
+}
+
+/* --- 【新增】在列表项中显示标签的样式 --- */
+.tags-display-area {
+    display: none; /* 默认不显示 */
+    margin-top: 8px;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.selection-mode-active .tags-display-area {
+    display: flex; /* 仅在选择模式下显示 */
+}
+.tags-display-area span {
+    background-color: #f5f6ff;
+    color: #5c85f4;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
+/* --- 【新增】在时间轴下拉菜单中显示标签的样式 --- */
+
+/* 1. 让下拉菜单的每一行支持 Flex 布局 */
+/* --- 【最终修正】使用类选择器，为DIV行准备样式 --- */
+.timeline-dropdown-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 12px 20px;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    text-align: left;
+    font-size: 16px;
+    cursor: pointer;
+}
+.timeline-dropdown-row:last-child {
+    border-bottom: none;
+}
+.timeline-dropdown-row:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+/* 2. 左侧内容容器（复选框 + 标题） */
+.timeline-item-main {
+    display: flex;
+    align-items: center;
+    min-width: 0; /* 核心：允许flex子项收缩，防止溢出 */
+    flex-grow: 1; /* 占据主要空间 */
+    max-width: 50%;
+}
+
+/* 3. 标题文本本身 */
+.timeline-title-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* 超出部分显示... */
+}
+
+/* 4. 右侧标签的容器 */
+.timeline-item-tags {
+    display: flex;
+    gap: 4px; /* 标签之间的间距 */
+    flex-shrink: 0; /* 防止标签被压缩 */
+    margin-left: 10px; /* 和左侧标题拉开距离 */
+}
+
+/* 5. 单个标签的样式 */
+.timeline-item-tags span {
+    /* 【核心修改】样式和聊天列表的标签完全对齐 */
+    background-color: #f5f6ff; /* 蓝色背景 */
+    color: #5c85f4;             /* 蓝色文字 */
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+/* --- 【新增】全局搜索功能样式 --- */
+
+/* 1. 侧边栏搜索框 */
+#global-search-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    font-size: 14px;
+}
+#global-search-input:focus {
+    outline: none;
+    border-color: #b1b6c8;
+    box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+}
+
+/* 2. 聊天/日记等内容中被高亮的关键词 */
+.highlight {
+    background-color: #a3d700; /* 亮黄色背景 */
+    color: #000;
+    font-weight: bold;
+    border-radius: 2px;
+    padding: 1px 2px;
+}
+
+/* 3. 详情页的搜索导航控件 */
+#search-nav-controls {
+    position: fixed; /* 核心：使用 fixed 定位，相对于整个浏览器窗口 */
+    bottom: 20px;
+    right: 20px;
+    /* display: flex;  <-- 由 JS 控制，这里可以删掉 */
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 8px 12px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    z-index: 1500; /* 确保它在最上层 */
+}
+#search-nav-controls span, #search-nav-controls button {
+    color: white;
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#search-match-count {
+    margin-right: 10px;
+}
+#search-prev-btn, #search-next-btn {
+    padding: 0 8px;
+}
+#search-close-btn {
+    margin-left: 10px;
+    font-size: 18px;
+}
+
+/* 当前激活的高亮词，给一个更明显的边框 */
+.highlight.active-highlight {
+    outline: 2px solid #f5af00; /* 亮橙色轮廓 */
+    box-shadow: 0 0 10px #f5af00;
+}
+
+/* 【最终版】透明底部工具栏样式 */
+
+/* 1. 工具栏容器 */
+#bottom-toolbar-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 20px;
+    padding-bottom: calc(15px + env(safe-area-inset-bottom));
+    
+    display: flex;
+    justify-content: space-around; /* 让所有按钮均匀分布 */
+    align-items: center;
+    
+    z-index: 1001;
+    background: transparent; /* 确保背景是透明的 */
+}
+
+/* 2. 所有按钮的样式重置 */
+.toolbar-btn {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    cursor: pointer;
+    
+    /* --- 核心修复 --- */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;  /* 给予一个固定的宽度 */
+    height: 40px; /* 给予一个固定的高度 */
+}
+
+/* 3. 图标的样式 */
+.toolbar-btn svg {
+    width: 30px;
+    height: 30px;
+    color: #e0e0e0; /* 非常浅淡的灰色 */
+    transition: all 0.2s;
+}
+
+/* 4. 鼠标悬停效果 */
+.toolbar-btn:hover svg {
+    color: #b1b6c8; /* 更深的紫色 */
+    transform: scale(1.1);
+}
+
+/* 【最终版】为所有可滚动内容区留出底部空间 */
+#chats-list-container,
+#starred-list-container,
+#timelines-content-container,
+#diary-grid-container,
+#messages-container,
+.sidebar-content { /* <-- 我们把侧边栏也包含进来了 */
+    /* 60px (工具栏高度) + 15px (额外间距) = 75px */
+    padding-bottom: 75px !important; /* <-- 使用 !important 确保它拥有最高优先级 */
+}
+
+
+/* 导入功能文件选择按钮的 "伪装" 样式 */
+.file-input-label {
+    display: block;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #b1b6c8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+/* 隐藏原始的、不好看的 input[type=file] 按钮 */
+#import-file-input {
+    display: none;
+}
+
+/* 分割线样式 */
+.import-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #aaa;
+    margin: 10px 0 20px 0;
+}
+.import-divider::before,
+.import-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #eee;
+}
+.import-divider span {
+    padding: 0 10px;
+}
+
+/*
+ * ===============================================
+ * 【最终布局方案】全局通栏抬头 + 内容区内缩
+ * ===============================================
+ */
+
+/* 1. 记忆列表的内容区 */
+#memory-list-container {
+    padding: 20px;
+    box-sizing: border-box; /* 确保 padding 不会撑破容器 */
+    height: 100%;
+    list-style: none;
+}
+
+/* 2. 日记网格的内容区 */
+#diary-grid-container {
+    padding: 20px;
+}
+
+/* 3. 时间轴节点的内容区 */
+#timelines-content-container {
+    padding-left: 20px;  /* 稍微多一点，给竖线留空间 */
+    padding-right: 3px;
+    padding-top: 10px;
+}
+
+/* 4. 首页的内容区 */
+#home-view {
+    padding: 20px;
+}
+
+/*
+  注意: 聊天详情页的 #messages-container 和 
+  日记编辑页的 #diary-entry-textarea 已经有自己的 padding，
+  所以我们不需要在这里重复设置。
+*/
+
+/*
+ * ===============================================
+ * 【V-Final】顶部栏美化方案
+ * ===============================================
+ */
+
+/* 
+ * 第一步：统一所有抬头的底色
+ * 我们选择纯白色，让它与内容区的浅色背景形成微妙的层次感。
+ * border-bottom 增加了一条极细的分割线，更显精致。
+ */
+.chat-header {
+    background-color: #ffffff; /* 统一设置为纯白色 */
+    border-bottom: 1px solid #f0f0f0; /* 添加一条非常淡的灰色分割线 */
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+
+/* 
+ * 第二步：定义所有抬头里“图标按钮”的默认颜色
+ * 我们选择一个中等强度的灰色，既清晰可见，又不会喧宾夺主。
+ */
+.chat-header button {
+    color: #555555; /* 苹果风格的中性灰，用于图标和文字 */
+    background: none; /* 确保按钮本身没有背景色 */
+    border: none; /* 确保按钮没有边框 */
+    padding: 6px 8px; /* 给予足够的点击区域 */
+    border-radius: 6px; /* 为“选中”状态的背景色准备圆角 */
+    transition: all 0.2s; /* 让所有变化都更平滑 */
+}
+
+
+/*
+ * 第三步：定义图标按钮被“选中”之后的样子
+ * 我们创建一个新的 .active-icon 类。任何按钮只要加上这个类，就会变成“选中”状态。
+ * 我们使用应用的主题色（蓝色）来表示激活状态。
+ */
+.chat-header button.active-icon {
+    color: #7a7cde; /* 1. 图标颜色变为高亮的蓝色 */
+    background-color: #e0eaff; /* 2. 按钮背景变为非常淡的蓝色，形成“胶囊”效果 */
+}
+
+
+/*
+ * (可选，但强烈推荐) 增加一个同样简约的交互效果
+ * 让用户在点击或悬停时获得清晰的反馈。
+ */
+.chat-header button:not(.active-icon):hover {
+    background-color: #f0f0f0; /* 鼠标悬停在未选中的图标上时，给一个淡灰色背景 */
+}
+.chat-header button:active {
+    transform: scale(0.95); /* 任何按钮在被按下的瞬间，都会轻微缩小 */
+}
+
+/*
+ * ===============================
+ * 【V-Final Complete】增大所有“选择”及相关操作按钮的字号
+ * ==================================
+ */
+
+/* 
+ * 这个组合选择器将统一处理：
+ * 1. 所有页面上用于【进入】选择模式的“选择”按钮本身
+ * 2. 所有页面上【进入选择模式后】出现的“取消”、“全选”等操作按钮
+ */
+
+/* --- 1. 定义所有【进入】选择模式的按钮 --- */
+#memory-list-select-btn,
+#timeline-select-btn,
+#diary-select-btn,
+#select-messages-btn, /* 这个是聊天/星标窗口里的“选择” */
+
+/* --- 2. 定义所有【进入后】在选择模式头部里的按钮 --- */
+#memory-list-selection-header button,
+#selection-diary-header button,
+#selection-chat-header button {
+    font-size: 15px; /* 统一设置为你想要的尺寸，比如 15px 或 16px */
+}
+
+/*
+ * ====================================
+ * 【最终修正】单独修复“解析并保存文本”按钮的样式
+ * ====================================
+ */
+
+#parse-and-save-text-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    background-color: #b1b6c8; /* 统一为我们的主色调紫 */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/*
+ * ===============================================
+ * 【新增】气泡内联时间戳样式
+ * ===============================================
+ */
+.message-timestamp-inline {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 1px; /* 和下面的消息内容拉开一点距离 */
+    opacity: 0.8; /* 【新增】让它稍微变淡一点，不那么抢眼 */
+}
+
+/* 用户气泡里的时间戳，颜色需要亮一点才能看清 */
+.user-message .message-timestamp-inline {
+    color: #e0e0e0;
+}
+
+/*
+ * =========================================================
+ * 【最终的、带景深镜头的首页方案】
+ * =========================================================
+ */
+
+#home-view.active-view {
+    /* (这部分保持不变) 让花体字在其中居中 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+
+    /* 
+     * --- 【终极核心魔法】---
+     *  我们用“多重背景”技术，把“图片”和“模糊遮罩”叠在一起。
+     */
+    background-image: 
+        /* 1. 最顶层：一个从中心透明、到四周半透明黑色的“径向渐变”遮罩 */
+        radial-gradient(
+            ellipse at center, 
+            rgba(0,0,0,0) 0%, /* 中心点完全透明 */
+            rgba(0,0,0,0.2) 100% /* 边缘是50%透明度的黑色，形成暗角 */
+        ),
+        
+        /* 2. 底层：我们之前选好的柔和渐变色 */
+        linear-gradient(to top right, #84a2d3, #a38db3, #d38ca2, #f0c27b);
+
+    /* (可选) 如果你还想用那张图片做背景，就把上面那行 linear-gradient 换成下面这行 */
+    /* background-image: 
+        radial-gradient(ellipse at center, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 100%),
+        url('你的图片链接'); 
+    */
+
+    background-size: cover;
+    background-position: center;
+}
+
+#home-view h1 {
+    /* (这部分恢复到我们之前的最佳状态) */
+    font-family: 'Dancing Script', cursive;
+    font-size: 100px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #ffffff;
+    text-shadow: 0px 3px 10px rgba(0, 0, 0, 0.4);
+    
+    /* 【核心修改】把向上移动的距离加回来 */
+    transform: translateY(-50px);
+}
+
+/* --- 【新增】时间轴节点选择功能样式 --- */
+
+/* 让“隔离舱”本身不参与高度的伸缩 */
+.timeline-headers-wrapper {
+    flex-shrink: 0;
+}
+
+/* 让内容区继续占据所有剩余空间 */
+#timelines-content-container {
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+/* 1. 节点选择模式下的时间轴视图 */
+/* 默认收起状态 (这个基本不变) */
+#selection-nodes-header {
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* 【核心修正】展开状态的规则变得更简单、更直接 */
+#selection-nodes-header.visible {
+    max-height: 60px;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+#selection-nodes-header button {
+    font-size: 12px; /* 时间轴副抬头按钮字体大小 */
+}
+/* 2. 节点被选中时的样式 */
+.timeline-node-item.selected > .node-content-wrapper {
+    background-color: rgba(241, 238, 255, 0.7);
+    border-radius: 4px;
+}
+
+/* 3. 在节点右侧显示标签的容器 */
+.node-tags-display {
+    display: none;
+    padding-left: 5px; /* 和节点文字拉开距离 */
+    gap: 4px;
+    flex-shrink: 0; /* 防止标签被压缩 */
+}
+/* 核心：只有在节点选择模式下，才让它显示出来 */
+#timelines-view.node-selection-mode .node-tags-display {
+    display: flex;
+}
+
+/* 4. 单个标签的样式 (复用时间轴下拉菜单里的样式) */
+.node-tags-display span {
+    background-color: #f5f6ff;
+    color: #5c85f4;
+    padding: 1px 5px;
+    border-radius: 10px;
+    font-size: 11px;
+    white-space: nowrap;
+}
+
+/* 5. 让节点内容容器支持 flex 布局，以便安放标签 */
+.node-content-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* 文字在左，标签在右 */
+}
+
+/* 6. 因标签筛选而被隐藏的节点 */
+.timeline-node-item.filtered-out {
+    display: none !important;
+}
+
+/* 7. 节点选择模式下，鼠标指针变为可点击状态 */
+#timelines-view.node-selection-mode .timeline-node-item {
+    cursor: pointer;
+}
+
+/* --- 【新增】侧边栏标签原地编辑样式 --- */
+.tag-item {
+    display: flex; /* 让输入框和按钮可以并排 */
+    align-items: center;
+}
+.tag-edit-input {
+    flex-grow: 1; /* 让输入框占据主要空间 */
+    border: none;
+    background: #e0eaff; /* 编辑时给一个淡蓝色背景 */
+    border-radius: 4px;
+    padding: 2px 5px;
+    margin-right: 5px;
+}
+.tag-edit-input:focus {
+    outline: none;
+}
+.save-tag-btn, .cancel-tag-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+}
+.save-tag-btn { color: #34c759; } /* 绿色对勾 */
+.cancel-tag-btn { color: #ff3b30; } /* 红色叉 */
+
+/* --- 【新增】“个性化设置”页面样式 --- */
+
+/* 1. 设置页面的整体布局 (Flex 布局) */
+#settings-view {
+}
+
+/* 2. 头像画廊容器 (网格布局) */
+#avatar-gallery-container {
+    flex-grow: 1; /* 占据所有剩余空间 */
+    overflow-y: auto; /* 内容可滚动 */
+    padding: 20px;
+    display: grid;
+    /* 自动填充列，每列最小100px，最大1fr，实现响应式 */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 20px;
+    align-content: start; /* 让内容从顶部开始排列 */
+}
+
+/* 3. 画廊里的单个头像容器 */
+.avatar-item {
+    position: relative; /* 为删除按钮提供定位基准 */
+    aspect-ratio: 1 / 1; /* 保持宽高比为1:1的正方形 */
+    border-radius: 50%; /* 圆形 */
+    overflow: hidden; /* 隐藏超出圆形的图片部分 */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 4. 头像图片本身 */
+.avatar-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 保证图片不变形地填满容器 */
+}
+
+/* 5. 删除按钮 (默认隐藏) */
+.delete-avatar-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 28px;
+    height: 28px;
+    background-color: rgba(255, 59, 48, 0.8); /* 半透明的红色 */
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+    opacity: 0; /* 默认完全透明 */
+    transform: scale(0.5); /* 默认缩小 */
+    transition: all 0.2s ease-in-out;
+}
+
+/* 6. 当鼠标悬停在头像上时，显示删除按钮 */
+.avatar-item:hover .delete-avatar-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* --- 剪裁与选择弹窗的样式 --- */
+
+#croppie-container {
+    width: 250px;
+    height: 250px;
+    margin: 0 auto 20px auto;
+}
+.cr-slider-wrap {
+    margin: 15px auto;
+}
+#confirm-crop-btn { /* 和上传按钮样式统一 */
+    width: 100%; padding: 12px; font-size: 16px;
+    background-color: #34c759; color: white;
+    border: none; border-radius: 8px; cursor: pointer; margin-top: 10px;
+}
+
+/* 头像选择列表 (画廊的翻版) */
+#avatar-picker-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 15px;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+.avatar-picker-item {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.avatar-picker-item:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 4px #e0eaff;
+}
+.avatar-picker-item img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+
+/* --- 【新增】彻底禁用【聊天气泡头像】的长按默认菜单 --- */
+.message-item .avatar {
+    -webkit-touch-callout: none; /* 专门禁用 iOS 的长按菜单 */
+    -webkit-user-select: none;   /* 禁止文本被选中 */
+    user-select: none;
+}
+
+/* --- 【新增】约束聊天气泡内头像图片的尺寸 --- */
+.message-item .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 核心：让图片不变形地填满圆形容器 */
+}

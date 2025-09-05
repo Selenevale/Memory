@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Memory</title>
+    <!-- 【核心新增】从 Google Fonts 引入 "Dancing Script" 字体 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.css" />
+<!-- 【核心新增】让我们的应用，拥有“主题颜色”（会改变浏览器顶部的颜色） -->
+    <meta name="theme-color" content="#b0ca8f">
+    <!-- 【核心新增】把“应用身份证”，注册到我们的主页里 -->
+    <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+    <!-- 主界面容器 -->
+    <div id="app-container">
+
+        <!-- 侧边栏 (初始隐藏) -->
+        <nav id="sidebar">
+            <div class="sidebar-content">
+                                <!-- 【修改】搜索容器 -->
+                <div id="search-container" class="sidebar-section">
+                    <input type="search" id="global-search-input" placeholder="全局搜索...">
+                </div>
+                                
+                <ul id="nav-links"></ul>
+<!-- 【修改】标签容器，用于承载可折叠的标签树 -->
+                <div id="tags-nav-container" class="sidebar-section">
+                    <!-- 标签树将由JS动态渲染到这里 -->
+                </div>
+            </div>
+        </nav>
+<!-- 【遮罩层】 -->
+<div id="sidebar-overlay"></div>
+
+
+        <!-- 主要内容显示区 -->
+        <main id="main-content">
+            <!-- 默认视图：首页/导入页 -->
+            <div id="home-view" class="view active-view">
+                <h1>Memory</h1>
+            </div>
+
+             <!-- 【请粘贴这个全新的“记忆列表”视图】 -->
+<div id="memory-list-view" class="view">
+    
+    <!-- 1. 全新的“双层抬头” -->
+    <header class="memory-header">
+        <!-- 第一层：主抬头 -->
+        <div class="main-header">
+            <div class="header-left">
+                <div class="view-switcher">
+                    <button id="switch-to-chats-btn" class="switcher-btn active">聊天</button>
+                    <button id="switch-to-starred-btn" class="switcher-btn">星标</button>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="memory-list-select-btn" class="header-btn-text">选择</button>
+            </div>
+        </div>
+        <!-- 第二层：选择模式抬头 (默认隐藏) -->
+        <div id="memory-list-selection-header" class="selection-header">
+            <button id="cancel-memory-list-selection-btn" class="header-btn-text">取消</button>
+            <div class="selection-actions">
+                <button id="select-all-memory-list-btn" class="header-btn-text">全选</button>
+                <button id="apply-tags-to-memory-list-btn" class="header-btn-text">添加标签</button>
+                <button id="delete-selected-memory-list-btn" class="header-btn-text">删除</button>
+                <button id="export-selected-memory-list-btn" class="header-btn-text">导出</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. 统一的内容列表容器 -->
+    <ul id="memory-list-container">
+        <!-- 聊天列表或星标列表将由 JS 动态渲染到这里 -->
+    </ul>
+
+</div>
+
+            <!-- 时间轴视图 (全新重构版) -->
+            <div id="timelines-view" class="view">
+    <div class="timeline-headers-wrapper">
+                <!-- 全新的固定头部 -->
+                <header id="timelines-header" class="chat-header">
+                    <button id="back-to-home-btn-timeline">&lt;</button>
+                    <button id="timeline-title-btn" class="timeline-title-button">时间轴 ▼</button>
+                    <div class="timeline-actions">
+    <!-- 【核心新增】节点选择模式的触发按钮 -->
+            <button id="timeline-node-select-btn" title="选择节点">
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M9 12l2 2l4 -4" /></svg>
+            </button>
+                        <button id="timeline-select-btn">选择</button>
+                        <button id="timeline-select-all-btn" style="display: none;">全选</button>
+
+<button id="timeline-apply-tags-btn" style="display: none;">添加标签</button> <!-- 【新增】 -->
+                        <button id="timeline-delete-btn" style="display: none;">删除</button>
+                        <button id="timeline-export-btn" style="display: none;">导出</button>
+                    </div>
+                </header>
+<!-- 【核心新增】节点选择模式的副工具栏 (默认隐藏) -->
+    <header id="selection-nodes-header" class="chat-header">
+        <button id="cancel-node-selection-btn">取消</button>
+        <div id="selection-nodes-actions">
+            <button id="select-all-nodes-btn">全选</button>
+            <button id="apply-tags-to-nodes-btn">添加标签</button>
+            <button id="delete-selected-nodes-btn">删除</button>
+            <button id="export-selected-nodes-btn">导出</button>
+        </div>
+    </header>
+
+                <!-- 时间轴节点内容的主容器 -->
+                <div id="timelines-content-container">
+                    <!-- 节点将由JS动态渲染到这里 -->
+                </div>
+    </div>
+                <!-- 【新增】仅在时间轴为空时显示的“快速创建”按钮 -->
+                <button id="show-bulk-add-btn" style="display: none;">+</button>
+
+                <!-- 【新增】时间轴选择下拉菜单 (默认隐藏) -->
+                <div id="timeline-list-dropdown" class="dropdown-menu">
+                    <!-- 列表将由JS动态生成 -->
+                </div>
+
+            </div>
+
+                        <!-- 日记列表视图 (全新) -->
+            <div id="diary-view" class="view">
+                <!-- 1. 固定的头部 -->
+                <header id="diary-header" class="chat-header">
+                    <!-- 返回首页的按钮，保持和其他页面一致 -->
+                    <button id="back-to-home-btn-diary">&lt;</button>
+                    <!-- 年份选择按钮 -->
+                    <button id="diary-year-btn" class="timeline-title-button">2025 ▼</button>
+                    <!-- 右侧操作按钮 -->
+                    <div class="timeline-actions">
+                        <button id="diary-select-btn">选择</button>
+                    </div>
+                </header>
+                <!-- 2. 列表选择模式下的头部 (默认隐藏) -->
+                                <header id="selection-diary-header" class="chat-header" style="display: none;">
+                    <button id="cancel-diary-selection-btn">取消</button>
+                    <div id="selection-diary-actions">
+                        <button id="select-all-diaries-btn">全选</button>
+                        <button id="apply-tags-to-diaries-btn">添加标签</button> <!-- 【新增】 -->
+                        <button id="delete-selected-diaries-btn">删除</button>
+                        <button id="export-selected-diaries-btn">导出</button>
+                    </div>
+                </header>
+
+                <!-- 3. 日记网格的主容器 (可滚动) -->
+                <div id="diary-grid-container">
+                    <!-- 日记卡片和月份分割线将由JS动态渲染到这里 -->
+                </div>
+
+                <!-- 4. 年份选择下拉菜单 (默认隐藏) -->
+                <div id="diary-year-dropdown" class="dropdown-menu">
+                    <!-- 年份列表将由JS动态生成 -->
+                </div>
+            </div>
+
+            <!-- 【新增】单个日记的编辑/查看视图 -->
+            <div id="diary-entry-view" class="view">
+                                <header class="chat-header">
+                    <button id="back-to-diary-list-btn">&lt;</button>
+                    <!-- 【核心修改】将h2标题换成日期输入框 -->
+                    <input type="date" id="diary-entry-date-input">
+                    <button id="save-diary-entry-btn">✓</button>
+                </header>
+                <textarea id="diary-entry-textarea" placeholder="从这里开始记录..."></textarea>
+            </div>
+
+            <!-- 单个聊天内容的详细视图 (通用) -->
+            <div id="chat-detail-view" class="view">
+                <header id="default-chat-header" class="chat-header">
+                    <button id="back-to-list-btn">&lt;</button>
+                    <div class="title-date-wrapper">
+                        <h2 id="chat-detail-title"></h2>
+                        <div id="chat-detail-date" class="chat-detail-date-editable">点击设置日期</div>
+                    </div>
+                    <button id="select-messages-btn">选择</button>
+                    <button id="chat-menu-btn" class="chat-menu-button">•••</button>
+
+                    <!-- 【新增】悬浮下拉菜单，默认隐藏 -->
+                    <div id="chat-dropdown-menu" class="dropdown-menu">
+                        <button data-action="select">选择</button>
+                        <button data-action="remarks">备注</button>
+                    </div>
+                </header>
+                <header id="selection-chat-header" class="chat-header" style="display: none;">
+                    <button id="cancel-selection-btn">取消</button>
+                    <div id="selection-actions">
+                        <button id="select-all-btn">全选</button>
+                        <button id="delete-selected-btn">删除</button>
+                        <button id="star-selected-btn">星标</button> <!-- 这个按钮会被动态显隐 -->
+                        <button id="export-selected-btn">导出</button>
+                    </div>
+                </header>
+                <div id="messages-container"></div>
+            </div>
+
+<!-- 【全新的“设置”视图，追加到 main 元素内所有 view 的末尾】 -->
+<div id="settings-view" class="view">
+    <!-- 1. 固定的头部 -->
+    <header id="settings-header" class="chat-header">
+        <!-- 这个按钮暂时不用，但我们先留好位置 -->
+        <button style="visibility: hidden;">&lt;</button> 
+        <h2>个性化设置</h2>
+        <!-- 右侧我们将放置“添加新头像”的按钮 -->
+        <div class="settings-actions">
+            <button id="add-new-avatar-btn" title="添加新头像">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M12 5l0 14" /><path d="M5 12l14 0" /></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. 头像画廊的主容器 -->
+    <div id="avatar-gallery-container">
+        <!-- 头像图片将由 JS 动态渲染到这里 -->
+    </div>
+</div>
+        </main>
+
+<!-- 【最终版】底部工具栏 -->
+<div id="bottom-toolbar-container">
+    <button id="sidebar-toggle-btn" class="toolbar-btn" title="菜单">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+    </button>
+    <button id="import-btn" class="toolbar-btn" title="导入">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+    </button>
+    <button id="export-all-btn" class="toolbar-btn" title="导出全部数据">
+         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+    </button>
+    <button id="new-diary-btn" class="toolbar-btn" title="新建日记">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+    </button>
+</div>
+
+        <!-- 【新增】关键词搜索导航控件 -->
+                <div id="search-nav-controls" style="display: none;">
+                    <span id="search-match-count">0 / 0</span>
+                    <button id="search-prev-btn">▲</button>
+                    <button id="search-next-btn">▼</button>
+                    <button id="search-close-btn">&times;</button>
+                </div>
+
+        <div id="download-link-container" class="download-container"></div>
+    </div>
+
+    <!-- 弹窗 -->
+    <div class="import-options">
+    
+<div id="import-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-btn">&times;</button>
+        <h2>导入新的聊天记录</h2>
+    <!-- 新增的文件上传部分 -->
+    <label for="import-file-input" class="file-input-label">
+        选择文件导入
+    </label>
+    <input type="file" id="import-file-input" accept=".txt,.json,text/plain,application/json">
+    <div class="import-divider">
+        <span>或者</span>
+    </div>
+
+    <!-- 旧的手动粘贴部分 -->
+    <p class="format-hint">格式提示：人类说的内容以 "¥" 开头，AI说的内容以 "$" 开头。</p>
+    <textarea id="import-textarea" placeholder="在这里粘贴文本..."></textarea>
+    <input type="text" id="import-title" placeholder="为这个聊天窗口命名 (可选)">
+    <button id="parse-and-save-text-btn">解析并保存文本</button>
+</div>
+        </div>
+    </div>
+    <div id="export-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h2>导出内容预览</h2>
+            <textarea id="export-textarea" readonly></textarea>
+            <button id="select-all-export-btn">一键全选文本</button>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/croppie/2.6.5/croppie.min.js"></script>
+<script src="main.js"></script>
+
+        <!-- 【新增】备注编辑弹窗 -->
+        <div id="remarks-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn">&times;</button>
+                <h2>编辑备注</h2>
+                <textarea id="remarks-textarea" placeholder="在这里输入备注..."></textarea>
+                <button id="save-remarks-btn">保存</button>
+            </div>
+        </div>
+    <!-- 【新增】时间轴大纲弹窗 -->
+        <div id="bulk-add-modal" class="modal-overlay">
+            <div class="modal-content">
+                <button class="close-btn">&times;</button>
+                <!-- 【修改】标题 -->
+                <h2>编辑时间轴大纲</h2> 
+                <input type="text" id="bulk-edit-timeline-title" placeholder="时间轴标题">
+                <p class="format-hint-timeline">
+                    使用星号定义层级:<br>
+                    * 一级节点<br>
+                    ** 二级节点<br>
+                    *** 三级节点
+                </p>
+                <textarea id="bulk-add-textarea" placeholder="在这里编辑你的时间轴大纲..."></textarea>
+                <!-- 【修改】按钮文字 -->
+                <button id="save-bulk-nodes-btn">保存并更新</button> 
+            </div>
+        </div>
+
+    <!-- 【新增】标签创建弹窗 -->
+    <div id="tag-creation-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h2>新增标签</h2>
+            <input type="text" id="new-tag-name-input" placeholder="输入新标签名称">
+            <input type="text" id="new-tag-category-input" list="category-suggestions" placeholder="选择或创建分类">
+            <datalist id="category-suggestions"></datalist>
+            <button id="save-new-tag-btn">保存标签</button>
+        </div>
+    </div>
+
+    <!-- 【新增】为项目应用标签的弹窗 -->
+    <div id="apply-tag-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button class="close-btn">&times;</button>
+            <h2>选择要添加的标签</h2>
+            <div id="apply-tag-list">
+                <!-- 标签列表将由JS动态渲染到这里 -->
+            </div>
+            <button id="confirm-apply-tag-btn">确认添加</button>
+        </div>
+    </div>
+
+<!-- 【头像剪裁弹窗】 -->
+<div id="avatar-cropper-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-btn">&times;</button>
+        <h2>设置新头像</h2>
+        <div id="croppie-container"></div>
+        <label for="avatar-upload-input" class="file-input-label">选择一张图片</label>
+        <input type="file" id="avatar-upload-input" accept="image/*" style="display: none;">
+        <button id="confirm-crop-btn">确认并保存</button>
+    </div>
+</div>
+
+<!-- 【新增】头像选择弹窗 -->
+<div id="avatar-picker-modal" class="modal-overlay">
+    <div class="modal-content">
+        <button class="close-btn">&times;</button>
+        <h2>选择一个头像</h2>
+        <div id="avatar-picker-list">
+            <!-- 头像选项将由JS动态渲染到这里 -->
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
