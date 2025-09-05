@@ -1858,7 +1858,9 @@ body, html {
 /* 1. 设置页面的整体布局 (Flex 布局) */
 #settings-view {
 }
-
+#settings-header h2 {
+    font-size: 22px; /* 你可以把这个值改成你觉得最舒服的大小，比如 20px 或 24px！ */
+}
 /* 2. 头像画廊容器 (网格布局) */
 #avatar-gallery-container {
     flex-grow: 1; /* 占据所有剩余空间 */
