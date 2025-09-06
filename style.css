@@ -445,7 +445,7 @@ body, html {
 .ai-message {
     align-items: flex-start;
     align-self: flex-start;
-    max-width: 100%;
+    max-width: 95%;
 }
 .ai-message .avatar { background-color: #E5E5EA; }
 .ai-message .message-bubble {
@@ -458,7 +458,7 @@ body, html {
 .user-message {
     align-self: flex-end;
     flex-direction: row-reverse;
-    max-width: 100%;
+    max-width: 95%;
 }
 .user-message .message-meta {
     flex-direction: row-reverse; /* 让头像在右边 */
